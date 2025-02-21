@@ -1,0 +1,10 @@
+tunnel: <Tunnel-UUID>
+credentials-file: /root/.cloudflared/{TUNNEL_UUID}.json
+
+ingress:
+  - hostname: {HOST_NAME}
+    service: http://localhost:{SERVICE_PORT}
+    originRequest:
+      noTLSVerify: true
+
+  - service: http_status:404
