@@ -19,7 +19,7 @@ class CloudFlareCli
     public static function create(Credentials $credentials): self
     {
         $ssh = Ssh::withCredentials($credentials)
-            ->setTimeout(5)
+            ->setTimeout(30)
             ->useSshPassPath('/opt/homebrew/bin/sshpass')
             ->sudo();
 
@@ -147,18 +147,6 @@ class CloudFlareCli
         $output = $this->ssh->execute($command)->getOutput();
         $this->logCommand($command, $output);
         return $output;
-    }
-
-    public function deleteDnsRecord(?string $tunnelUuid): string
-    {
-        if ($tunnelUuid === null || $tunnelUuid === '') {
-            return "Cannot find dns record for unspecified domain";
-        }
-        $command = "cloudflared tunnel route dns delete {$tunnelUuid}";
-        $output = $this->ssh->execute($command)->getOutput();
-        $this->logCommand($command, $output);
-        return $output;
-
     }
 
     public function createAndStartTunnelRunnerService(string $domain, string $content): string

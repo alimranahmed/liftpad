@@ -1,9 +1,14 @@
 <div>
-    <div class="border rounded-md">
+    <div class="border rounded-xl" x-data="{ showTerminal: false }">
         <div class="flex justify-between border-b w-full px-3 py-2">
             <h3 class="font-semibold">Tunnels</h3>
             <div>
-                <button wire:click="getTunnels" wire:loading.remove wire:target="getTunnels" class="hover:underline">Load</button>
+                <button wire:click="getTunnels" wire:loading.remove wire:target="getTunnels" class="hover:text-indigo-500">
+                    Load
+                </button>
+                <span wire:loading wire:target="getTunnels">
+                    Loading...
+                </span>
             </div>
         </div>
         <div class="px-3 py-2">
@@ -29,9 +34,17 @@
                                     <x-ui.table.td>{{$tunnel['domain']}}</x-ui.table.td>
                                     <x-ui.table.td>
                                         @if($tunnel['configFile'])
-                                            <span class="cursor-pointer hover:underline" wire:click="showTunnelConfig('{{$tunnel['configFile']}}')">Show</span>
+                                            <span class="cursor-pointer hover:text-indigo-500"
+                                                  wire:click="showTunnelConfig('{{$tunnel['configFile']}}')"
+                                                  @click="showTerminal = true">Show</span>
                                         @endif
-                                        <span class="cursor-pointer hover:underline" wire:click="deleteTunnel('{{$tunnel['uuid']}}')">Delete</span>
+                                        <span class="cursor-pointer hover:text-indigo-500"
+                                              wire:loading.remove
+                                              wire:target="deleteTunnel('{{$tunnel['uuid']}}')"
+                                              wire:click="deleteTunnel('{{$tunnel['uuid']}}')"
+                                              @click="showTerminal = true"
+                                        >Delete</span>
+                                        <span class="" wire:loading wire:target="deleteTunnel('{{$tunnel['uuid']}}')">Deleting...</span>
                                     </x-ui.table.td>
                                 </tr>
                             @endforeach
@@ -40,19 +53,13 @@
                 @endif
             </div>
         </div>
-    </div>
-    @if($output)
-        <div class="mt-3">
-            <div class="border dark:border-gray-800 rounded-t-xl p-1 flex justify-between bg-white">
-                <div class="font-semibold">Tunnel Config</div>
-                <div><span wire:click="clearOutput" class="hover:underline cursor-pointer">Close</span></div>
-            </div>
-            <x-terminal.screen>
+        <div x-show="showTerminal" x-transition>
+            <x-terminal.screen stream="{{$streamTo}}">
                 <span wire:loading.remove wire:target="showTunnelConfig">{!! $output !!}</span>
                 <span wire:loading wire:target="showTunnelConfig">
                     Loading...
                 </span>
             </x-terminal.screen>
         </div>
-    @endif
+    </div>
 </div>
