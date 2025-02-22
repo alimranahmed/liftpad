@@ -1,4 +1,9 @@
-<section>
+<div>
+
+    <livewire:cloudflare.tunnels lazy serverId="{{$server->uuid}}"/>
+
+    <livewire:cloudflare.add-domain serverId="{{$server->uuid}}"/>
+
     <form class="mt-5 flex border dark:border-gray-800 rounded-t-xl p-1 justify-between bg-white" wire:submit="execute">
         <input type="text"
                autofocus="autofocus"
@@ -12,15 +17,5 @@
             <span class="text-indigo-600 cursor-not-allowed" disabled wire:loading>Running...</span>
         </div>
     </form>
-    <div class="bg-gray-800 text-white p-6 rounded-b-xl overflow-hidden font-mono text-sm whitespace-pre-wrap h-80 overflow-y-scroll"
-         wire:stream="display" >{!! $output !!}</div>
-
-
-    <div>
-        @foreach($tunnelDomainPairs as $tunnelDomainPair)
-            <div>Tunnel: {{$tunnelDomainPair['tunnel_uuid']}}</div>
-            <div>Domain: {{$tunnelDomainPair['domain']}}</div>
-        @endforeach
-    </div>
-
-</section>
+    <x-terminal.screen stream="display">{!! $output !!}</x-terminal.screen>
+</div>

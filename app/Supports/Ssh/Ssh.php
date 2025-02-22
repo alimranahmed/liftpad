@@ -28,6 +28,8 @@ class Ssh
 
     protected string $sshPassPath = 'sshpass';
 
+    protected ?string $sudoPassword = null;
+
     public function __construct(?string $user, string $host, ?int $port = null, ?string $password = null)
     {
         $this->user = $user;
@@ -52,6 +54,19 @@ class Ssh
         return new static(...$args);
     }
 
+    public static function withCredentials(Credentials $credentials): self {
+        $instance = new static(
+            $credentials->user,
+            $credentials->host,
+            $credentials->port,
+            $credentials->password
+        );
+        if ($credentials->privateKeyPath) {
+            $instance->usePrivateKey($credentials->privateKeyPath);
+        }
+        return $instance;
+    }
+
     public function usePrivateKey(string $pathToPrivateKey): self
     {
         $this->extraOptions['private_key'] = '-i ' . $pathToPrivateKey;
@@ -64,6 +79,11 @@ class Ssh
         return $this;
     }
 
+    public function sudo(?string $password = null): self {
+        $this->sudoPassword = $password ?? $this->password;
+        return $this;
+    }
+
     public function useJumpHost(string $jumpHost): self
     {
         $this->extraOptions['jump_host'] = '-J ' . $jumpHost;
@@ -71,6 +91,9 @@ class Ssh
         return $this;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function usePort(int $port): self
     {
         if ($port < 0) {
@@ -116,9 +139,9 @@ class Ssh
         return $this;
     }
 
-    public function setTimeout(int $timeout): self
+    public function setTimeout(int $seconds): self
     {
-        $this->timeout = $timeout;
+        $this->timeout = $seconds;
 
         return $this;
     }
@@ -181,12 +204,7 @@ class Ssh
         return '';
     }
 
-    /**
-     * @param string|array $command
-     *
-     * @return string
-     */
-    public function getExecuteCommand($command): string
+    public function getExecuteCommand(string|array $command): string
     {
         $commands = $this->wrapArray($command);
 
@@ -201,16 +219,20 @@ class Ssh
 
         $target = $this->getTargetForSsh();
 
-        return "{$passwordCommand}ssh {$extraOptions} {$target} '$commandString'";
 
-//        $delimiter = 'EOF-SPATIE-SSH';
-//
-//        $bash = $this->addBash ? "'bash -se'" : '';
-//
-//
-//        return "{$passwordCommand}ssh {$extraOptions} {$target} {$bash} << \\$delimiter".PHP_EOL
-//            .$commandString.PHP_EOL
-//            .$delimiter;
+        $delimiter = 'EOF-SSH-COMMAND';
+
+        $bash = $this->addBash ? "'bash -se'" : '';
+
+        if ($this->sudoPassword !== null) {
+            return "{$passwordCommand}ssh {$extraOptions} {$target} {$bash} << \\$delimiter".PHP_EOL
+                ."echo '{$this->sudoPassword}' | sudo -S bash -c \"{$commandString}\"".PHP_EOL
+                .$delimiter;
+        }
+
+        return "{$passwordCommand}ssh {$extraOptions} {$target} {$bash} << \\$delimiter".PHP_EOL
+            .$commandString.PHP_EOL
+            .$delimiter;
     }
 
     /**
@@ -233,7 +255,6 @@ class Ssh
     public function executeAsync($command): InvokedProcess
     {
         $sshCommand = $this->getExecuteCommand($command);
-        //dd($sshCommand);
         return \Illuminate\Support\Facades\Process::timeout($this->timeout)->start($sshCommand);
         //return $this->run($sshCommand, 'start');
     }

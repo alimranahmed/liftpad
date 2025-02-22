@@ -20,7 +20,7 @@
     @endif
 </head>
 <body class="font-sans antialiased dark:bg-black dark:text-white/50">
-    <div class="max-w-3xl mx-auto px-6">
+    <div class="max-w-6xl mx-auto px-6">
         {{ $slot }}
     </div>
 </body>

@@ -1,4 +1,4 @@
-tunnel: <Tunnel-UUID>
+tunnel: {TUNNEL_UUID}
 credentials-file: /root/.cloudflared/{TUNNEL_UUID}.json
 
 ingress:
