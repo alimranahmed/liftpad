@@ -30,6 +30,8 @@ class Ssh
 
     protected ?string $sudoPassword = null;
 
+    protected bool $sudo = false;
+
     public function __construct(?string $user, string $host, ?int $port = null, ?string $password = null)
     {
         $this->user = $user;
@@ -81,6 +83,7 @@ class Ssh
 
     public function sudo(?string $password = null): self {
         $this->sudoPassword = $password ?? $this->password;
+        $this->sudo = true;
         return $this;
     }
 
@@ -224,10 +227,16 @@ class Ssh
 
         $bash = $this->addBash ? "'bash -se'" : '';
 
-        if ($this->sudoPassword !== null) {
-            return "{$passwordCommand}ssh {$extraOptions} {$target} {$bash} << \\$delimiter".PHP_EOL
-                ."echo '{$this->sudoPassword}' | sudo -S bash -c \"{$commandString}\"".PHP_EOL
-                .$delimiter;
+        if ($this->sudo) {
+            if ($this->sudoPassword !== null) {
+                return "{$passwordCommand}ssh {$extraOptions} {$target} {$bash} << \\$delimiter".PHP_EOL
+                    ."echo '{$this->sudoPassword}' | sudo -S bash -c \"{$commandString}\"".PHP_EOL
+                    .$delimiter;
+            } else {
+                return "{$passwordCommand}ssh {$extraOptions} {$target} {$bash} << \\$delimiter".PHP_EOL
+                    ."sudo -S bash -c \"{$commandString}\"".PHP_EOL
+                    .$delimiter;
+            }
         }
 
         return "{$passwordCommand}ssh {$extraOptions} {$target} {$bash} << \\$delimiter".PHP_EOL

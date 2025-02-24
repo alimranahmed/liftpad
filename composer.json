@@ -10,12 +10,11 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "blade-ui-kit/blade-icons": "^1.8",
-        "calebporzio/sushi": "^2.5",
         "laravel/framework": "^11.31",
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^3.5",
-        "sensiolabs/ansi-to-html": "^1.3"
+        "sensiolabs/ansi-to-html": "^1.3",
+        "wireui/wireui": "^2.2"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

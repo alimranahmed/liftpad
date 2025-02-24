@@ -16,6 +16,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Server extends Model
 {
+    protected $guarded = ['id'];
+
     protected $casts = [
         'user' => 'encrypted',
         'host' => 'encrypted',

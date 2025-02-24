@@ -6,6 +6,7 @@ use App\Supports\Ssh\Credentials;
 use App\Supports\Ssh\Ssh;
 use Illuminate\Process\InvokedProcess;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class CloudFlareCli
 {
@@ -19,8 +20,8 @@ class CloudFlareCli
     public static function create(Credentials $credentials): self
     {
         $ssh = Ssh::withCredentials($credentials)
+            ->disableStrictHostKeyChecking()
             ->setTimeout(30)
-            ->useSshPassPath('/opt/homebrew/bin/sshpass')
             ->sudo();
 
         return new static($credentials, $ssh);
@@ -31,6 +32,9 @@ class CloudFlareCli
         Log::channel('command')->info($command."\n".$output);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function  getTunnels(): array
     {
         $domains = $this->getDomains();
@@ -41,6 +45,7 @@ class CloudFlareCli
         $output = '';
         while ($process->running()) {
             $output .= $process->latestOutput();
+            $output .= $process->latestErrorOutput();
         }
 
         preg_match_all('/([a-f0-9\-]{36})\s+([\w.-]+)/', $output, $matches, PREG_SET_ORDER);
@@ -194,6 +199,16 @@ class CloudFlareCli
     public function getDomain(string $tunnelUuid): ?string
     {
         $domains = $this->getDomains();
-        return $domains[$tunnelUuid]['domain'] ?? null;
+        if (isset($domains[$tunnelUuid]['domain'])) {
+            return $domains[$tunnelUuid]['domain'];
+        }
+        return $this->getTunnel($tunnelUuid)['name'] ?? null;
+    }
+
+    public function getTunnel(string $tunnelUuid): ?array
+    {
+        return collect($this->getTunnels())
+            ->where('uuid', $tunnelUuid)
+            ->first();
     }
 }
