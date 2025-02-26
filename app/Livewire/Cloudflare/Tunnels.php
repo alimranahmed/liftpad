@@ -29,6 +29,7 @@ class Tunnels extends Component
     {
         $this->serverId = $serverId;
         $this->server = Server::query()->where('uuid', $this->serverId)->firstOrFail();
+        $this->getTunnels();
     }
 
     public function getTunnels(): void
@@ -89,6 +90,10 @@ class Tunnels extends Component
         return CloudFlareCli::create($this->server->toCredentials());
     }
 
+    public function placeholder()
+    {
+        return view('livewire.cloudflare.tunnels-placeholder');
+    }
     public function render(): View
     {
         return view('livewire.cloudflare.tunnels');

@@ -211,4 +211,23 @@ class CloudFlareCli
             ->where('uuid', $tunnelUuid)
             ->first();
     }
+
+    public function updateCloudflared(): InvokedProcess
+    {
+        return $this->ssh->executeAsync("apt upgrade cloudflared -y");
+    }
+
+    public function latestVersion(): string
+    {
+        return $this->ssh
+            ->execute("curl -s https://api.github.com/repos/cloudflare/cloudflared/releases/latest | jq -r '.tag_name' grep -oP '\d+\.\d+\.\d+")
+            ->getOutput();
+    }
+
+    public function getVersion(): string
+    {
+        return $this->ssh
+            ->execute("cloudflared --version | grep -oP '\d+\.\d+\.\d+'")
+            ->getOutput();
+    }
 }

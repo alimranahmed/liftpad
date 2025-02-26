@@ -1,4 +1,5 @@
-<div>
+<div class="grid grid-cols-1 gap-y-3">
+    <livewire:cloudflare.cloudflared-details lazy serverId="{{$server->uuid}}"/>
 
     <livewire:cloudflare.tunnels lazy serverId="{{$server->uuid}}"/>
 

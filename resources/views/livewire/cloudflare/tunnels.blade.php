@@ -4,7 +4,7 @@
             <h3 class="font-semibold">Tunnels</h3>
             <div>
                 <button wire:click="getTunnels" wire:loading.remove wire:target="getTunnels" class="hover:text-indigo-500">
-                    Load
+                    Reload
                 </button>
                 <span wire:loading wire:target="getTunnels">
                     Loading...
