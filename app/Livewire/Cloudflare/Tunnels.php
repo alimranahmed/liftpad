@@ -25,6 +25,9 @@ class Tunnels extends Component
 
     public Server $server;
 
+    /**
+     * @throws \Exception
+     */
     public function mount(string $serverId): void
     {
         $this->serverId = $serverId;
@@ -32,11 +35,17 @@ class Tunnels extends Component
         $this->getTunnels();
     }
 
+    /**
+     * @throws \Exception
+     */
     public function getTunnels(): void
     {
         $this->tunnels = $this->cloudflared()->getTunnels();
     }
 
+    /**
+     * @throws \Exception
+     */
     #[On('tunnelUpdated')]
     public function tunnelUpdated(): void
     {

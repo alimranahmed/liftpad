@@ -5,8 +5,8 @@
 
     <livewire:cloudflare.add-domain serverId="{{$server->uuid}}"/>
 
-    <div x-data="{ showTerminal: false }">
-        <form class="mt-5 flex border dark:border-gray-800 rounded-t-xl p-1 justify-between bg-white"
+    <div x-data="{ showTerminal: false }" class="border rounded-xl p-3">
+        <form class="flex justify-between bg-white border-b mb-3"
               wire:submit="execute"
               @submit="showTerminal= true"
         >
@@ -23,8 +23,6 @@
             </div>
         </form>
 
-        <div x-show="showTerminal" x-transition>
-            <x-terminal.screen stream="display">{!! $output !!}</x-terminal.screen>
-        </div>
+        <x-terminal.screen stream="display">{!! $output !!}</x-terminal.screen>
     </div>
 </div>
