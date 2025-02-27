@@ -5,8 +5,6 @@ namespace App\Livewire\Cloudflare;
 use App\Livewire\CanStreamProcess;
 use App\Models\Server;
 use App\Supports\Cloudflare\CloudFlareCli;
-use App\Supports\Ssh\Ssh;
-use Exception;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -22,7 +20,10 @@ class CloudflaredDetails extends Component
 
     public string $cloudflaredVersion;
 
-    public bool $isLatest = true;
+    public string $msgForVersionCheck = '';
+
+    public ?bool $isLatest = null;
+
 
     public ?string $serverId;
 
@@ -34,7 +35,7 @@ class CloudflaredDetails extends Component
     {
         $this->serverId = $serverId;
         $this->osVersion = $this->getOsVersion();
-        $this->cloudflaredVersion = $this->getCloudflaredVersion();
+        $this->cloudflaredVersion = $this->cloudflared->getVersion();
     }
 
     public function placeholder(): View
@@ -47,14 +48,15 @@ class CloudflaredDetails extends Component
         return $this->cloudflared->ssh->execute("lsb_release -d | cut -f2")->getOutput();
     }
 
-    private function getCloudflaredVersion(): string
+    public function checkForUpdate(): void
     {
-        $currentVersion = $this->cloudflared->getVersion();
         $latestVersion = $this->cloudflared->latestVersion();
-        if (!empty($latestVersion)) {
-            $this->isLatest = $currentVersion !== $latestVersion;
+        if ($latestVersion === null) {
+            $this->msgForVersionCheck = 'check failed';
+        } else {
+            $this->isLatest = $this->cloudflaredVersion !== $latestVersion;
+            $this->msgForVersionCheck = $this->isLatest ? 'latest' : "latest: $latestVersion";
         }
-        return $currentVersion;
     }
 
     /**

@@ -1,6 +1,6 @@
 <div>
-    <div class="border rounded-xl" x-data="{ showTerminal: false }">
-        <div class="flex justify-between border-b w-full px-3 py-2">
+    <div class="border rounded-xl grid grid-cols-1 gap-3 p-3" x-data="{ showTerminal: false }">
+        <div class="flex justify-between border-b w-full">
             <h3 class="font-semibold">Tunnels</h3>
             <div>
                 <button wire:click="getTunnels" wire:loading.remove wire:target="getTunnels" class="hover:text-indigo-500">
@@ -11,7 +11,7 @@
                 </span>
             </div>
         </div>
-        <div class="px-3 py-2">
+        <div>
             <div wire:loading wire:target="getTunnels" class="text-center w-full">Loading...</div>
             <div wire:loading.remove wire:target="getTunnels">
                 @if(count($tunnels) <= 0)
@@ -53,13 +53,11 @@
                 @endif
             </div>
         </div>
-        <div x-show="showTerminal" x-transition>
-            <x-terminal.screen stream="{{$streamTo}}">
-                <span wire:loading.remove wire:target="showTunnelConfig">{!! $output !!}</span>
-                <span wire:loading wire:target="showTunnelConfig">
-                    Loading...
-                </span>
-            </x-terminal.screen>
-        </div>
+        <x-terminal.screen stream="{{$streamTo}}">
+            <span wire:loading.remove wire:target="showTunnelConfig">{!! $output !!}</span>
+            <span wire:loading wire:target="showTunnelConfig">
+                Loading...
+            </span>
+        </x-terminal.screen>
     </div>
 </div>

@@ -5,8 +5,9 @@ namespace App\Supports\Cloudflare;
 use App\Supports\Ssh\Credentials;
 use App\Supports\Ssh\Ssh;
 use Illuminate\Process\InvokedProcess;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 class CloudFlareCli
 {
@@ -196,6 +197,9 @@ class CloudFlareCli
         return $output;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function getDomain(string $tunnelUuid): ?string
     {
         $domains = $this->getDomains();
@@ -205,6 +209,9 @@ class CloudFlareCli
         return $this->getTunnel($tunnelUuid)['name'] ?? null;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function getTunnel(string $tunnelUuid): ?array
     {
         return collect($this->getTunnels())
@@ -217,11 +224,13 @@ class CloudFlareCli
         return $this->ssh->executeAsync("apt upgrade cloudflared -y");
     }
 
-    public function latestVersion(): string
+    public function latestVersion(): ?string
     {
-        return $this->ssh
-            ->execute("curl -s https://api.github.com/repos/cloudflare/cloudflared/releases/latest | jq -r '.tag_name' grep -oP '\d+\.\d+\.\d+")
-            ->getOutput();
+        $response = Http::get('https://api.github.com/repos/cloudflare/cloudflared/releases/latest');
+        if ($response->successful()) {
+            return Arr::get($response->json(), 'tag_name');
+        }
+        return null;
     }
 
     public function getVersion(): string
