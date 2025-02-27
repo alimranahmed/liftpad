@@ -1,7 +1,11 @@
-<div>
+<div x-data="{showTerminal: false}">
     <x-ui.drawer title="Add Server">
         <div>
-            <pre class="whitespace-pre-line border rounded-xl bg-slate-800 text-slate-200 p-2 mb-3">
+            <span class="font-semibold">How to add a user in server</span>
+            <span class="font-light text-gray-600">(eg. username: liftpad_manager)?</span>
+        </div>
+        <x-terminal.screen>
+            <pre class="whitespace-pre-line">
                 sudo adduser liftpad_manager
                 su - liftpad_manager
                 mkdir -p ~/.ssh
@@ -14,8 +18,8 @@
                 sudo chmod -R 755 /var/www/html
                 sudo systemctl restart ssh
             </pre>
-        </div>
-        <form wire:submit="saveServer">
+        </x-terminal.screen>
+        <form wire:submit="saveServer" class="my-3">
             <div class="grid grid-cols-1 gap-y-3">
                 <x-input type="text" wire:model="name" :shadowless="true" name="name" placeholder="Name"/>
                 <x-input type="text" wire:model="host" :shadowless="true" name="host" icon="server" placeholder="Server IP/Hostname"/>
@@ -23,19 +27,20 @@
             </div>
 
             <div>
-                <x-ui.button class="mt-3" wire:loading.remove wire:target="saveServer">Add</x-ui.button>
+                <x-ui.button class="mt-3" wire:loading.remove wire:target="saveServer" @click="showTerminal = true">Add</x-ui.button>
                 <x-ui.button type="button" class="mt-3 cursor-not-allowed" wire:loading wire:target="saveServer">Adding...</x-ui.button>
             </div>
         </form>
 
+        <x-terminal.screen stream="{{$streamTo}}">{!! $output !!}</x-terminal.screen>
+
         @if($sshPublicKey)
-            <x-terminal.screen>{{$sshPublicKey}}</x-terminal.screen>
+            <div class="mt-3">
+                <div class="font-semibold mb-2">Add this public key to the server</div>
+                <x-terminal.screen class="mb-3">{{$sshPublicKey}}</x-terminal.screen>
 
-            <x-ui.button wire:click="checkConnection({{$createdServerUuid}})">Check Connection</x-ui.button>
-        @endif
-
-        @if($output)
-            <x-terminal.screen>{{$output}}</x-terminal.screen>
+                <x-ui.button wire:click="checkConnection('{{$createdServerUuid}}')">Check Connection</x-ui.button>
+            </div>
         @endif
     </x-ui.drawer>
 </div>

@@ -2,11 +2,11 @@
 
 namespace App\Livewire\Server;
 
+use App\Livewire\CanStreamProcess;
 use App\Models\Server;
 use App\Supports\Ssh\Ssh;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\File;
-use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Validate;
@@ -14,6 +14,8 @@ use Livewire\Component;
 
 class ServerForm extends Component
 {
+    use CanStreamProcess;
+
     #[Validate('required|max:200')]
     public string $name = '';
 
@@ -25,10 +27,15 @@ class ServerForm extends Component
 
     public ?string $sshPublicKey = null;
 
+    public string $streamTo = 'key-generation';
+
     public ?string $output = null;
 
     public ?string $createdServerUuid = null;
 
+    /**
+     * @throws \Exception
+     */
     public function saveServer(): void
     {
         $data = $this->validate();
@@ -41,36 +48,48 @@ class ServerForm extends Component
 
         $this->reset('name', 'host', 'user');
 
-        $server = Server::query()->create($data);
+        $sshPath = $this->generateSshKey($server);
 
-        $output = null;
-        $returnVar = null;
-
-        Storage::createDirectory('.ssh');
-        Storage::createDirectory('.ssh/liftpad_access');
-
-        $sshPath = storage_path("app/private/.ssh/liftpad_access/{$server->uuid}");
-
-        $command ="ssh-keygen -t rsa -b 4096 -C liftpad_server_{$server->uuid} -f {$sshPath} -N ''";
-        exec($command, $output, $returnVar);
-        $this->output = implode("\n", $output);
-
-        if($returnVar === 0) {
+        if($sshPath !== null) {
             $file = new File("{$sshPath}.pub");
             $this->sshPublicKey = $file->getContent();
             $server->update(['private_key_path' => $sshPath]);
         }
     }
 
-    public function checkConnection(string $serverUuid): string
+    /**
+     * @throws \Exception
+     */
+    private function generateSshKey(Server $server): ?string
+    {
+        $this->logAndStreamMessage('Started generating SSH key');
+        Storage::createDirectory('.ssh');
+        Storage::createDirectory('.ssh/liftpad_access');
+
+        $sshPath = storage_path("app/private/.ssh/liftpad_access/{$server->uuid}");
+
+        $output = null;
+        $returnVar = null;
+
+        $command ="ssh-keygen -t rsa -b 4096 -C liftpad_server_{$server->uuid} -f {$sshPath} -N ''";
+        exec($command, $output, $returnVar);
+
+        $this->logAndStreamMessage(implode("\n", $output), $this->streamTo);
+
+        return $returnVar === 0 ? $sshPath : null;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function checkConnection(string $serverUuid): void
     {
         $server = Server::query()->where('uuid', $serverUuid)->first();
         $process = Ssh::withCredentials($server->toCredentials())
-            ->execute('whoami');
+            ->disableStrictHostKeyChecking()
+            ->executeAsync('whoami');
 
-        $this->output = $process->getOutput();
-
-        return $this->output;
+        $this->streamProcess($process, $this->streamTo);
     }
 
     public function render(): View

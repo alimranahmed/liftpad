@@ -17,7 +17,7 @@
                     From: "translate-x-0"
                     To: "translate-x-full"
                 -->
-                <div class="pointer-events-auto w-screen max-w-md">
+                <div class="pointer-events-auto w-screen max-w-lg">
                     <div class="flex h-full flex-col overflow-y-scroll bg-white py-6 shadow-xl">
                         <div class="px-4 sm:px-6">
                             <div class="flex items-start justify-between">
