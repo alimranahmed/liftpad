@@ -33,6 +33,8 @@ class ServerForm extends Component
 
     public ?string $createdServerUuid = null;
 
+    public ?bool $isConnected = null;
+
     /**
      * @throws \Exception
      */
@@ -87,9 +89,14 @@ class ServerForm extends Component
         $server = Server::query()->where('uuid', $serverUuid)->first();
         $process = Ssh::withCredentials($server->toCredentials())
             ->disableStrictHostKeyChecking()
-            ->executeAsync('whoami');
+            ->execute('whoami');
 
-        $this->streamProcess($process, $this->streamTo);
+        $this->isConnected = $process->isSuccessful();
+
+        $server->update([
+            'is_connected' => $this->isConnected,
+            'last_connection_checked_at' => now(),
+        ]);
     }
 
     public function render(): View

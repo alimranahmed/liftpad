@@ -256,12 +256,7 @@ class Ssh
         return $this->run($sshCommand);
     }
 
-    /**
-     * @param string|array $command
-     *
-     * @return \Symfony\Component\Process\Process
-     */
-    public function executeAsync($command): InvokedProcess
+    public function executeAsync(string|array $command): InvokedProcess
     {
         $sshCommand = $this->getExecuteCommand($command);
         return \Illuminate\Support\Facades\Process::timeout($this->timeout)->start($sshCommand);

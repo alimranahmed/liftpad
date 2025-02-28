@@ -20,8 +20,10 @@ return new class extends Migration
             $table->unsignedInteger('port')->default(22)->nullable();
             $table->string('password', 1024)->nullable();
             $table->string('private_key_path', 1024)->nullable();
-
+            $table->unsignedInteger('is_connected')->nullable();
+            $table->dateTime('last_connection_checked_at')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -35,11 +35,19 @@
         <x-terminal.screen stream="{{$streamTo}}">{!! $output !!}</x-terminal.screen>
 
         @if($sshPublicKey)
-            <div class="mt-3">
-                <div class="font-semibold mb-2">Add this public key to the server</div>
-                <x-terminal.screen class="mb-3">{{$sshPublicKey}}</x-terminal.screen>
+            <div class="mt-3 grid grid-cols-1 gap-3">
+                <div class="font-semibold">Add this public key to the server</div>
+                <x-terminal.screen>{{$sshPublicKey}}</x-terminal.screen>
 
                 <x-ui.button wire:click="checkConnection('{{$createdServerUuid}}')">Check Connection</x-ui.button>
+
+                <div>
+                    @if($isConnected === true)
+                        <span class="text-green-700">Connection established successfully!</span>
+                    @elseif($isConnected === false)
+                        <span class="text-red-700">Connection failed!</span>
+                    @endif
+                </div>
             </div>
         @endif
     </x-ui.drawer>

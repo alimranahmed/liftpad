@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Server;
+use App\Supports\Ssh\Ssh;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Url;
@@ -10,48 +11,36 @@ use Livewire\Component;
 
 class ServerManager extends Component
 {
-    /**
-     * - Create uer:
-     * sudo adduser liftpad_manager
-     *
-     * - Grant SSH Access
-     * > ssh-keygen -t rsa -b 4096
-     * > su - liftpad_manager
-     * > mkdir -p ~/.ssh
-     * > cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-     * > chmod 600 ~/.ssh/authorized_keys
-     * > chmod 700 ~/.ssh
-     * > exit
-     *
-     * - Grant sudo permission
-     * > sudo usermod -aG sudo liftpad_manager
-     * > sudo visudo
-     * // Add the line below at the end of visudo
-     * "liftpad_manager ALL=(ALL) NOPASSWD: ALL"
-     *
-     * - Configure ownership of deployment directory
-     * > sudo chown -R liftpad_manager:www-data /var/www/html
-     * > sudo chmod -R 755 /var/www/html
-     *
-     * - Enable SSH login for user
-     * > sudo vim /etc/ssh/sshd_config
-     * // Make sure these lines are added
-     *
-     * - Restart ssh
-     * sudo systemctl restart ssh
-     *
-     * - Test ssh login
-     * ssh -i ~/.ssh/id_rsa liftpad_manager@yourserver.com
-     */
-
     #[Url]
     public ?string $serverId = null;
 
     public Collection $servers;
 
+    public ?bool $isConnected = null;
+
     public function mount(): void
     {
         $this->servers = Server::query()->get();
+    }
+
+    public function deleteServer(string $serverUuid): void
+    {
+        Server::query()->where('uuid', $serverUuid)->delete();
+    }
+
+    public function checkConnection(string $serverUuid): void
+    {
+        $server = Server::query()->where('uuid', $serverUuid)->first();
+        $process = Ssh::withCredentials($server->toCredentials())
+            ->disableStrictHostKeyChecking()
+            ->execute('whoami');
+
+        $this->isConnected = $process->isSuccessful();
+
+        $server->update([
+            'is_connected' => $this->isConnected,
+            'last_connection_checked_at' => now(),
+        ]);
     }
 
     public function render(): View
