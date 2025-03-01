@@ -12,12 +12,15 @@ use Illuminate\Support\Str;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
-class ServerForm extends Component
+class Create extends Component
 {
     use CanStreamProcess;
 
     #[Validate('required|max:200')]
     public string $name = '';
+
+    #[Validate('required|numeric|min:0')]
+    public int $port = 22;
 
     #[Validate('required|max:100')]
     public string $host = '';
@@ -101,6 +104,6 @@ class ServerForm extends Component
 
     public function render(): View
     {
-        return view('livewire.server.server-form');
+        return view('livewire.server.create');
     }
 }

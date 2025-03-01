@@ -1,6 +1,11 @@
-@props(['stream' => null])
+@props(['stream' => null, 'rounded' => 'bottom'])
+
 @php
-    $terminalClass = "bg-gray-800 text-white px-6 rounded-b-xl overflow-hidden font-mono text-sm whitespace-pre-wrap h-auto max-h-80 overflow-y-scroll overflow-x-scroll scrollbar-none terminal-screen scroll-m-0";
+    $rounded = [
+        'bottom' => 'rounded-b-xl',
+        'all' => 'rounded-xl',
+    ][$rounded];
+    $terminalClass = "bg-gray-800 text-white px-3 {$rounded} overflow-hidden font-mono text-sm whitespace-pre-line h-auto max-h-80 overflow-y-scroll overflow-x-scroll scrollbar-none terminal-screen scroll-m-0";
 @endphp
 <div {{$attributes->merge([])}}>
     @if($stream)

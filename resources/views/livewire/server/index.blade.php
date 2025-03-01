@@ -1,11 +1,10 @@
-<section x-data="{showServerForm: false}">
+<section>
     <div class="flex justify-between my-3">
-        <div><h2 class="text-md font-semibold">Servers</h2></div>
+        <div><h2 class="text-xl font-semibold">Servers</h2></div>
         <div>
-            <x-ui.button class="rounded border h-full px-2" x-on:click="showServerForm = true">Add New Server</x-ui.button>
-            <div x-show="showServerForm" x-transition @drawer-closed.window="showServerForm = false">
-                <livewire:server.server-form/>
-            </div>
+            <a href="{{route('server.create')}}" wire:navigate>
+                <x-ui.button class="rounded border h-full px-2">Add New Server</x-ui.button>
+            </a>
         </div>
     </div>
 
@@ -22,10 +21,10 @@
                 </div>
                 <div class="text-slate-500">{{$server->user.'@'.$server->host}}</div>
                 <div>
-                    <span class="cursor-pointer border px-1 rounded-md text-sm hover:text-gray-300"
+                    <span class="cursor-pointer border px-1 rounded-md text-sm text-gray-500 hover:text-gray-700"
                           wire:target="checkConnection"
                           wire:loading.class="cursor-wait"
-                          wire:click="checkConnection('{{$server->uuid}}')">Connect</span>
+                          wire:click="checkConnection('{{$server->uuid}}')">Check</span>
                 </div>
                 <div class="col-span-3">
                     @if($isConnected === true)
