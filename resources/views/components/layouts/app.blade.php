@@ -23,8 +23,8 @@
 <body class="font-sans antialiased">
     <div class="max-w-6xl mx-auto px-6 mb-10">
         <div class="flex gap-3 text-slate-400 py-3">
-            <a href="{{route('server.index')}}" @class(['text-indigo-800' => request()->routeIs('server.index')]) wire:navigate>Servers</a>
-            <a href="{{route('website.index')}}" @class(['text-indigo-800' => request()->routeIs('website.index')]) wire:navigate>Websites</a>
+            <a href="{{route('server.index')}}" @class(['text-indigo-800' => request()->is('servers*')]) wire:navigate>Servers</a>
+            <a href="{{route('website.index')}}" @class(['text-indigo-800' => request()->is('websites*')]) wire:navigate>Websites</a>
         </div>
         {{ $slot }}
     </div>
