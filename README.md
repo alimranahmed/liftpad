@@ -5,6 +5,8 @@ If you have `cloudflared` cli installed in your server already and want to add d
 
 This tool is built using [Laravel](https://laravel.com), it also uses [MySQL](https://www.mysql.com) database.
 
+<p align="center"><img src="https://raw.githubusercontent.com/alimranahmed/liftpad/refs/heads/main/storage/public/screenshots/03_websites_index.png" width="700" alt="Laravel Logo"></p>
+
 ### Context
 This tool basically handles the steps after 3rd step of "Using Cloudflare to Make Our Web App Public" mentioned in this article: [How I Turned an Old Laptop into a Web Hosting Server for My Laravel Application](https://medium.com/@al_imran_ahmed/how-i-turned-an-old-laptop-into-a-web-hosting-server-for-my-laravel-application-e9035692d56b)
 
@@ -33,6 +35,18 @@ This tool basically handles the steps after 3rd step of "Using Cloudflare to Mak
 3. Go to websites menu and select the server
 4. It should automatically load all your added tunnels and `cloudflared` version
 5. To add a new domain simply add the domain name and application port and click Add
+
+<p align="center"><img src="https://raw.githubusercontent.com/alimranahmed/liftpad/refs/heads/main/storage/public/screenshots/01_add_server.png" width="700" alt="Add Server"></p>
+Add Server
+
+<p align="center"><img src="https://raw.githubusercontent.com/alimranahmed/liftpad/refs/heads/main/storage/public/screenshots/02_server_index.png" width="700" alt="Server list"></p>
+Server list
+
+<p align="center"><img src="https://raw.githubusercontent.com/alimranahmed/liftpad/refs/heads/main/storage/public/screenshots/04_add_domain.png" width="700" alt="Add Domain"></p>
+Add Domain
+
+
+
 
 ### How it works?
 1. When you add a domain(e.g. example.com) and port(e.g. 8081) and click **Add** button
