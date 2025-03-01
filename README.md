@@ -36,17 +36,14 @@ This tool basically handles the steps after 3rd step of "Using Cloudflare to Mak
 4. It should automatically load all your added tunnels and `cloudflared` version
 5. To add a new domain simply add the domain name and application port and click Add
 
+<p align="center">Add Server</p>
 <p align="center"><img src="https://raw.githubusercontent.com/alimranahmed/liftpad/refs/heads/main/storage/app/public/screenshots/01_add_server.png" width="700" alt="Add Server"></p>
-Add Server
 
+<p align="center">Server list</p>
 <p align="center"><img src="https://raw.githubusercontent.com/alimranahmed/liftpad/refs/heads/main/storage/app/public/screenshots/02_server_index.png" width="700" alt="Server list"></p>
-Server list
 
+<p align="center">Add Domain</p>
 <p align="center"><img src="https://raw.githubusercontent.com/alimranahmed/liftpad/refs/heads/main/storage/app/public/screenshots/04_add_domain.png" width="700" alt="Add Domain"></p>
-Add Domain
-
-
-
 
 ### How it works?
 1. When you add a domain(e.g. example.com) and port(e.g. 8081) and click **Add** button
