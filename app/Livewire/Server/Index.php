@@ -16,7 +16,7 @@ class Index extends Component
 
     public Collection $servers;
 
-    public ?bool $isConnected = null;
+    public array $connectionStatuses = [];
 
     public function mount(): void
     {
@@ -41,10 +41,10 @@ class Index extends Component
             ->disableStrictHostKeyChecking()
             ->execute('whoami');
 
-        $this->isConnected = $process->isSuccessful();
+        $this->connectionStatuses[$server['uuid']] = $process->isSuccessful();
 
         $server->update([
-            'is_connected' => $this->isConnected,
+            'is_connected' => $this->connectionStatuses[$server['uuid']],
             'last_connection_checked_at' => now(),
         ]);
 

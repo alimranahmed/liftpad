@@ -27,9 +27,9 @@
                           wire:click="checkConnection('{{$server->uuid}}')">Check</span>
                 </div>
                 <div class="col-span-3">
-                    @if($isConnected === true)
+                    @if(isset($connectionStatuses[$server->uuid]) && $connectionStatuses[$server->uuid] === true)
                         <span class="text-green-700">Connection established successfully!</span>
-                    @elseif($isConnected === false)
+                    @elseif(isset($connectionStatuses[$server->uuid]) && $connectionStatuses[$server->uuid] === false)
                         <span class="text-red-700">Connection failed!</span>
                     @endif
                 </div>
