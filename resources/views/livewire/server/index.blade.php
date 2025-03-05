@@ -24,6 +24,7 @@
                     <span class="cursor-pointer border px-1 rounded-md text-sm text-gray-500 hover:text-gray-700"
                           wire:target="checkConnection('{{$server->uuid}}')"
                           wire:loading.class="cursor-wait"
+                          wire:loading.attr="disabled"
                           wire:click="checkConnection('{{$server->uuid}}')">Check</span>
                 </div>
                 <div class="col-span-3">

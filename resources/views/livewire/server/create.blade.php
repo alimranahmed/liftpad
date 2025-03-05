@@ -63,6 +63,13 @@
                         @elseif($isConnected === false)
                             <span class="text-red-700">Connection failed!</span>
                         @endif
+                        @if($isConnected !== null)
+                            <div class="mt-3">
+                                <a href="{{route('server.index')}}" wire:navigate>
+                                    <x-ui.button>Go the server list page</x-ui.button>
+                                </a>
+                            </div>
+                        @endif
                     </div>
                 </div>
             @endif

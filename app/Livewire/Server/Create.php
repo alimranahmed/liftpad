@@ -9,6 +9,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
@@ -43,7 +44,12 @@ class Create extends Component
      */
     public function saveServer(): void
     {
-        $data = $this->validate();
+        try {
+            $data = $this->validate();
+        } catch (ValidationException $e) {
+            $this->logAndStreamMessage('Validation ERROR: '.$e->getMessage());
+            throw $e;
+        }
 
         $data = [...$data, 'uuid' => Str::uuid7()];
 
