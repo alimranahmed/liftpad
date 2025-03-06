@@ -2,8 +2,20 @@
     <div class="flex justify-between"><div>
             <img src="{{asset('images/cloudflared_logo.svg')}}" alt="Cloudflare logo">
             <div class="mt-2 flex justify-start gap-x-2 items-center">
-                <span class="text-gray-600">Version: {{$cloudflaredVersion}}{{$msgForVersionCheck ? "($msgForVersionCheck)" : ''}}</span>
-                @if($isLatest === null)
+                @if($isCloudflaredMissing === true)
+                    <span class="text-red-600">Cloudflared missing</span>
+                    <x-icon name="cloud-arrow-down"
+                            class="h-5 w-5 cursor-pointer hover:text-indigo-600"
+                            wire:loading.class.remove="cursor-pointer"
+                            wire:loading.class="animate-pulse cursor-not-allowed"
+                            wire:loading.attr="disabled"
+                            wire:target="installCloudflared"
+                            wire:click="installCloudflared"
+                            @click="showTerminal = true"/>
+                @elseif($isCloudflaredMissing === false)
+                    <span class="text-gray-600">Version: {{$cloudflaredVersion}}{{$msgForVersionCheck ? "($msgForVersionCheck)" : ''}}</span>
+                @endif
+                @if($isLatest === null && in_array($isCloudflaredMissing, [null, false]))
                     <x-icon name="arrow-path"
                             class="h-4 w-4 cursor-pointer hover:text-indigo-600"
                             wire:loading.class.remove="cursor-pointer"

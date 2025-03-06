@@ -2,12 +2,15 @@
 
 namespace App\Supports\Cloudflare;
 
+use App\Supports\Cloudflare\Exceptions\CloudflaredNotInstalled;
+use App\Supports\Cloudflare\Exceptions\CommandFailed;
 use App\Supports\Ssh\Credentials;
 use App\Supports\Ssh\Ssh;
 use Illuminate\Process\InvokedProcess;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\Process\Process;
 
 class CloudFlareCli
 {
@@ -31,6 +34,16 @@ class CloudFlareCli
     public function logCommand(string $command, $output): void
     {
         Log::channel('command')->info($command."\n".$output);
+    }
+
+    /**
+     * @throws CommandFailed
+     */
+    public function checkProcessFailure(Process $process): void
+    {
+        if (!$process->isSuccessful()) {
+            throw new CommandFailed($process->getErrorOutput());
+        }
     }
 
     /**
@@ -233,10 +246,51 @@ class CloudFlareCli
         return null;
     }
 
+    /**
+     * @throws CloudflaredNotInstalled
+     */
     public function getVersion(): string
     {
-        return $this->ssh
-            ->execute("cloudflared --version | grep -oP '\d+\.\d+\.\d+'")
-            ->getOutput();
+        $process = $this->ssh
+            ->execute("cloudflared --version | grep -oP '\d+\.\d+\.\d+'");
+
+        if (!$process->isSuccessful()){
+            $error = $process->getErrorOutput();
+            if (preg_match('/(\w+): command not found/', $error, $matches)) {
+                throw new CloudflaredNotInstalled($matches[0]);
+            }
+        }
+
+        return $process->getOutput();
+    }
+
+    /**
+     * @throws \App\Supports\Cloudflare\Exceptions\CommandFailed
+     */
+    public function installCloudflared(): InvokedProcess
+    {
+        // Add Cloudflare's package signing key:
+        $process = $this->ssh->execute('mkdir -p --mode=0755 /usr/share/keyrings');
+        $this->checkProcessFailure($process);
+
+        $process = $this->ssh->execute('curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null');
+        $this->checkProcessFailure($process);
+
+        // Add Cloudflare's apt repo to your apt repositories
+        $process = $this->ssh->execute('echo "deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main" | sudo tee /etc/apt/sources.list.d/cloudflared.list');
+        $this->checkProcessFailure($process);
+
+        // Update repositories and install cloudflared
+        return $this->ssh->executeAsync('sudo apt-get update && sudo apt-get install cloudflared');
+    }
+
+    /**
+     * @throws CommandFailed
+     */
+    public function loginCloudflared(): string
+    {
+        $process = $this->ssh->execute('cloudflared tunnel login');
+        $this->checkProcessFailure($process);
+        return $process->getOutput()."\n".$process->getErrorOutput();
     }
 }

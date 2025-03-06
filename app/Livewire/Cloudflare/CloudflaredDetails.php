@@ -5,6 +5,8 @@ namespace App\Livewire\Cloudflare;
 use App\Livewire\CanStreamProcess;
 use App\Models\Server;
 use App\Supports\Cloudflare\CloudFlareCli;
+use App\Supports\Cloudflare\Exceptions\CloudflaredNotInstalled;
+use App\Supports\Cloudflare\Exceptions\CommandFailed;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -24,6 +26,8 @@ class CloudflaredDetails extends Component
 
     public ?bool $isLatest = null;
 
+    public ?bool $isCloudflaredMissing = null;
+
 
     public ?string $serverId;
 
@@ -31,21 +35,51 @@ class CloudflaredDetails extends Component
 
     public string $streamTo = 'cloudflared-details';
 
+    /**
+     * @throws \Exception
+     */
     public function mount(string $serverId): void
     {
         $this->serverId = $serverId;
-        $this->osVersion = $this->getOsVersion();
-        $this->cloudflaredVersion = $this->cloudflared->getVersion();
+        $this->loadDetails();
+
     }
 
-    public function placeholder(): View
+    /**
+     * @throws \Exception
+     */
+    private function loadDetails(): void
     {
-        return view('livewire.cloudflare.cloudflared-details-placeholder');
+        $this->osVersion = $this->getOsVersion();
+        try {
+            $this->cloudflaredVersion = $this->cloudflared->getVersion();
+            $this->isCloudflaredMissing = false;
+        } catch (CloudflaredNotInstalled $e) {
+            $this->isCloudflaredMissing = true;
+            $this->logAndStreamMessage($e->getMessage());
+        }
     }
 
     private function getOsVersion(): string
     {
         return $this->cloudflared->ssh->execute("lsb_release -d | cut -f2")->getOutput();
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function installCloudflared(): void
+    {
+        try {
+            $process = $this->cloudflared->installCloudflared();
+            $this->streamProcess($process, $this->streamTo);
+            $output = $this->cloudflared->loginCloudflared();
+            dd($output);
+            $this->logAndStreamMessage($output);
+            $this->loadDetails();
+        } catch (CommandFailed $e) {
+            $this->logAndStreamMessage($e->getMessage());
+        }
     }
 
     public function checkForUpdate(): void
@@ -77,6 +111,11 @@ class CloudflaredDetails extends Component
     {
         $server = Server::query()->where('uuid', $this->serverId)->firstOrFail();
         return CloudFlareCli::create($server->toCredentials());
+    }
+
+    public function placeholder(): View
+    {
+        return view('livewire.cloudflare.cloudflared-details-placeholder');
     }
 
     public function render(): View
