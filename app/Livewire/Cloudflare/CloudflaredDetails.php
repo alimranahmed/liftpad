@@ -72,10 +72,13 @@ class CloudflaredDetails extends Component
     {
         try {
             $process = $this->cloudflared->installCloudflared();
+            if ($process === null) {
+                $this->logAndStreamMessage("Cloudflared already installed");
+                return;
+            }
             $this->streamProcess($process, $this->streamTo);
-            $output = $this->cloudflared->loginCloudflared();
-            dd($output);
-            $this->logAndStreamMessage($output);
+            $process = $this->cloudflared->loginCloudflared();
+            $this->streamProcess($process, $this->streamTo);
             $this->loadDetails();
         } catch (CommandFailed $e) {
             $this->logAndStreamMessage($e->getMessage());

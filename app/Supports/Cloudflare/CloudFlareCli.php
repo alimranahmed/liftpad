@@ -265,9 +265,9 @@ class CloudFlareCli
     }
 
     /**
-     * @throws \App\Supports\Cloudflare\Exceptions\CommandFailed
+     * @throws CommandFailed
      */
-    public function installCloudflared(): InvokedProcess
+    public function installCloudflared(): ?InvokedProcess
     {
         // Add Cloudflare's package signing key:
         $process = $this->ssh->execute('mkdir -p --mode=0755 /usr/share/keyrings');
@@ -277,20 +277,23 @@ class CloudFlareCli
         $this->checkProcessFailure($process);
 
         // Add Cloudflare's apt repo to your apt repositories
+        $process = $this->ssh->execute('sudo add-apt-repository ppa:certbot/certbot -y');
+        $this->checkProcessFailure($process);
+
         $process = $this->ssh->execute('echo "deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main" | sudo tee /etc/apt/sources.list.d/cloudflared.list');
         $this->checkProcessFailure($process);
 
         // Update repositories and install cloudflared
-        return $this->ssh->executeAsync('sudo apt-get update && sudo apt-get install cloudflared');
+        return $this->ssh->executeAsync('sudo apt update && sudo apt install cloudflared');
     }
 
     /**
      * @throws CommandFailed
      */
-    public function loginCloudflared(): string
+    public function loginCloudflared(): InvokedProcess
     {
-        $process = $this->ssh->execute('cloudflared tunnel login');
-        $this->checkProcessFailure($process);
-        return $process->getOutput()."\n".$process->getErrorOutput();
+        return $this->ssh
+            ->setTimeout(5*60)
+            ->executeAsync('cloudflared tunnel login');
     }
 }
